@@ -8,13 +8,13 @@ function Square({ value, onSquareClick }) {
   );
 }
 
-function Board({ xIsNext, squareStates, onPlay }) {
+function Board({ xIsNext, squareStates, onPlay, currentMove }) {
   const winner = calculateWinner(squareStates);
   let status;
   if (winner) {
     status = `Winner: ${winner}`;
   } else {
-    status = `Next player: ${xIsNext ? "X" : "O"}`;
+    status = `Current player: ${xIsNext ? "X" : "O"}`;
   }
 
   function handleClick(i) {
@@ -60,10 +60,13 @@ function Board({ xIsNext, squareStates, onPlay }) {
     }
     return null;
   }
-
   return (
     <>
-      <div className="status">{status}</div>
+      <div className="status">
+        {status}
+        <br />
+        Current Move: {currentMove}
+      </div>
       <div className="board-row">
         <Square value={squareStates[0]} onSquareClick={() => handleClick(0)} />
         <Square value={squareStates[1]} onSquareClick={() => handleClick(1)} />
@@ -136,6 +139,7 @@ export default function Game() {
           xIsNext={xIsNext}
           squareStates={currentSquareStates}
           onPlay={handlePlay}
+          currentMove={currentMove}
         />
       </div>
       <div className="game-info">
