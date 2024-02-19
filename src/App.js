@@ -8,13 +8,7 @@ function Square({ value, onSquareClick }) {
   );
 }
 
-export default function Board() {
-  // State of the current player
-  const [xIsNext, setXIsNext] = useState(true);
-
-  // States of the squares
-  const [squareStates, setSquareStates] = useState(Array(9).fill(null));
-
+function Board({ xIsNext, squareStates, onPlay }) {
   const winner = calculateWinner(squareStates);
   let status;
   if (winner) {
@@ -35,8 +29,7 @@ export default function Board() {
     } else {
       nextSquareStates[i] = "O";
     }
-    setXIsNext(!xIsNext);
-    setSquareStates(nextSquareStates);
+    onPlay(nextSquareStates);
   }
 
   function calculateWinner(squareStates) {
@@ -87,5 +80,67 @@ export default function Board() {
         <Square value={squareStates[8]} onSquareClick={() => handleClick(8)} />
       </div>
     </>
+  );
+}
+
+export default function Game() {
+  // State of the current player
+  const [xIsNext, setXIsNext] = useState(true);
+
+  // History of the squares
+  const [history, setHistory] = useState([Array(9).fill(null)]);
+
+  const [currentMove, setCurrentMove] = useState(0);
+
+  const currentSquareStates = history[currentMove];
+
+  const moves = history.map((squareStates, move) => {
+    let description;
+    if (move) {
+      description = `Go to move #${move} [${squareStates}]`;
+    } else {
+      description = `Go to game start`;
+    }
+    return (
+      <li key={move}>
+        <button onClick={() => jumpTo(move)}>{description}</button>
+      </li>
+    );
+  });
+
+  function jumpTo(nextMove) {
+    /**
+     * Jumps to a specific move in the history of the game.
+     * @param {number} nextMove - The move to jump to.
+     */
+    setCurrentMove(nextMove);
+    setXIsNext(nextMove % 2 === 0);
+  }
+
+  function handlePlay(nextSquareStates) {
+    /**
+     * Handles the play of the current player.
+     * @param {Array} nextSquareStates - The next state of the squares in the tic-tac-toe game.
+     */
+    // if the move is not the last move in the history, discard all the moves after the current move
+    let newHistory = [...history.slice(0, currentMove + 1), nextSquareStates];
+    setHistory(newHistory);
+    setCurrentMove(newHistory.length - 1);
+    setXIsNext(!xIsNext);
+  }
+
+  return (
+    <div className="game">
+      <div className="game-board">
+        <Board
+          xIsNext={xIsNext}
+          squareStates={currentSquareStates}
+          onPlay={handlePlay}
+        />
+      </div>
+      <div className="game-info">
+        <ol>{moves}</ol>
+      </div>
+    </div>
   );
 }
